@@ -2,6 +2,14 @@
 
 An extremely simple CLI tool to split string contents.
 
+## Install
+
+You can either download the latest release builds form the [Releases page](https://github.com/shellshape/ssplit/releases) or you can install it using cargo install.
+
+```
+cargo install ssplit
+```
+
 ## Usage
 
 ```

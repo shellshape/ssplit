@@ -1,0 +1,17 @@
+[package]
+name = "ssplit"
+version = "1.0.0"
+edition = "2021"
+authors = ["Ringo Hoffmann <contact@zekro.de>"]
+description = "Simple CLI tool to split string contents"
+readme = "README.md"
+license = "MIT"
+repository = "https://github.com/shellshape/sstring"
+homepage = "https://github.com/shellshape/sstring"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.75"
+clap = { version = "4.4.4", features = ["derive"] }
+console = "0.15.7"

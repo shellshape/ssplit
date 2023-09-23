@@ -1,13 +1,17 @@
 #![feature(iter_intersperse)]
+#![feature(test)]
+
+mod splitter;
 
 use std::{
     fs::File,
-    io::{self, Read, Write},
+    io::{self, Read},
 };
 
 use anyhow::Result;
 use clap::Parser;
 use console::style;
+use splitter::Splitter;
 
 /// An extremely simple CLI tool to split string contents.
 #[derive(Parser, Debug)]
@@ -44,91 +48,8 @@ fn run() -> Result<()> {
         None => Box::new(io::stdin()),
     };
 
-    let mode = SplitMode::try_from_idx(args.idx, args.delimiter)?;
-
-    split_stream(input, io::stdout(), args.split, mode)?;
-
-    Ok(())
-}
-
-enum SplitMode {
-    Replace(String),
-    Indices {
-        indices: Vec<u32>,
-        delimiter: String,
-    },
-}
-
-impl SplitMode {
-    fn try_from_idx(idx: Option<String>, delimiter: String) -> Result<Self> {
-        let Some(idx) = idx else {
-            return Ok(Self::Replace(delimiter));
-        };
-
-        let elems = idx.split(',').map(str::trim);
-
-        let mut indices = vec![];
-        for elem in elems {
-            if let Some((from, to)) = elem.split_once('-') {
-                let from = from.parse()?;
-                let to = to.parse()?;
-                if from >= to {
-                    anyhow::bail!("range begin value must be smaller than end value: {elem}");
-                }
-                for i in from..=to {
-                    indices.push(i);
-                }
-            } else {
-                indices.push(elem.parse()?);
-            }
-        }
-
-        Ok(Self::Indices { indices, delimiter })
-    }
-}
-
-fn split_stream<S: Into<String>>(
-    mut input: impl Read,
-    mut output: impl Write,
-    split: S,
-    mode: SplitMode,
-) -> Result<()> {
-    let split: String = split.into();
-
-    let mut buf = [0u8; 16 * 1024];
-    let mut i = 0;
-    let mut first = true;
-
-    loop {
-        let n = input.read(&mut buf)?;
-        if n == 0 {
-            break;
-        }
-
-        let str = String::from_utf8(buf[..n].to_vec())?;
-        let split = str.split(&split);
-
-        match &mode {
-            SplitMode::Replace(with) => {
-                for elem in split.intersperse(with) {
-                    output.write_all(elem.as_bytes())?;
-                }
-            }
-            SplitMode::Indices { indices, delimiter } => {
-                for elem in split {
-                    if indices.contains(&i) {
-                        if !first {
-                            output.write_all(delimiter.as_bytes())?;
-                        } else {
-                            first = false;
-                        }
-                        output.write_all(elem.as_bytes())?;
-                    }
-                    i += 1;
-                }
-            }
-        }
-    }
+    let splitter = Splitter::try_from_idx(args.idx, args.delimiter)?;
+    splitter.split_stream(input, io::stdout(), args.split)?;
 
     Ok(())
 }

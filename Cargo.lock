@@ -164,6 +164,7 @@ dependencies = [
  "anyhow",
  "clap",
  "console",
+ "test-utils",
 ]
 
 [[package]]
@@ -182,6 +183,11 @@ dependencies = [
  "quote",
  "unicode-ident",
 ]
+
+[[package]]
+name = "test-utils"
+version = "0.1.0"
+source = "git+https://github.com/shellshape/test-utils#cfabafb7cfd4bcbad96babc946e4aecf8daf8c1f"
 
 [[package]]
 name = "unicode-ident"
